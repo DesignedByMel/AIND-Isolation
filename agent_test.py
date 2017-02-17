@@ -169,7 +169,7 @@ def makeBranchEval(first_branch):
 
     return score
 
-
+#TODO example of a dfs with the board
 class CounterBoard(isolation.Board):
     """Subclass of the isolation board that maintains counters for the number
     of unique nodes and total nodes visited during depth first search.

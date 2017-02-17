@@ -7,7 +7,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 import random
-
+from random import randint
 
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
@@ -36,6 +36,9 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+
+    # TODO: make three
+
 
     # TODO: finish this function!
     raise NotImplementedError
@@ -117,26 +120,36 @@ class CustomPlayer:
         """
 
         self.time_left = time_left
-
         # TODO: finish this function!
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
 
+        # TODO: optimiazation, opening/closing books and symetry
+        best_move = (-1,-1)
+
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            pass
 
+            # if iterative_deeping == True:
+                # keep track of the best move at any time, update as I move down the tree
+                    # I htink this means more of BFS
+                    # maybe go up the plies instead of down, and put in the game as it changes? idk
+            #else:
+            best_move = self.method(game, self.search_depth)
+            pass
         except Timeout:
             # Handle any actions required at timeout, if necessary
-            pass
+            # If it runs out of time just return the best move.
+            return best_move
 
         # Return the best move from the last completed search iteration
-        raise NotImplementedError
+        # this returns a tuple for the location
+        return best_move
 
     def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
@@ -172,9 +185,17 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if depth == 0:
+            return self.score(game, self)
 
+        if maximizing_player == True:
+            best_score =  max([self.minimax(game.forcast_move(potential_move), depth-1, False) for potential_move in game.get_legal_moves()])
+        else:
+            best_score = min([self.minimax(game.forcast_move(potential_move), depth-1, True) for potential_move in game.get_legal_moves()])
+
+        return best_score
+
+    # This will be the same as mini max, but with more terminating conditions, and updating alpha and beta
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
         lectures.
@@ -216,5 +237,8 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
+
         # TODO: finish this function!
         raise NotImplementedError
+        # returns the score or does it return the location or both? (like location if it finds the answer and score if it hasn't)
+        # Return should be exactly the same as mini max
