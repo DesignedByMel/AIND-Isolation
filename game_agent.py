@@ -140,8 +140,12 @@ class CustomPlayer:
                     # I htink this means more of BFS
                     # maybe go up the plies instead of down, and put in the game as it changes? idk
             #else:
-            best_move = self.method(game, self.search_depth)
-            pass
+
+            if self.method == 'minimax':
+                _, best_move = self.minimax(game,self.search_depth)
+            elif self.method == 'alphabeta':
+                _, best_move = self.minimax(game, self.search_depth)
+
         except Timeout:
             # Handle any actions required at timeout, if necessary
             # If it runs out of time just return the best move.
@@ -182,18 +186,29 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
+
+        # Raises timeout exception when time is up
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
+        # Termination Function, if we are at the depth we wanted we score the "leaf" and go back up the tree
         if depth == 0:
-            return self.score(game, self)
+            return self.score(game, self), None
+
+        # Get the legal moves, if none then return (-1,-1)
+        next_moves = game.get_legal_moves()
+        if len(next_moves) == 0:
+            return self.score(game, self), (-1,-1)
 
         if maximizing_player == True:
-            best_score =  max([self.minimax(game.forcast_move(potential_move), depth-1, False) for potential_move in game.get_legal_moves()])
+            # If a max player, find the max of the score of all legal moves on the next level. Return a tuple of max score and the move that got there
+            best_score, best_move = max([(self.minimax( game.forecast_move(potential_move), depth-1, False)[0], potential_move) for potential_move in next_moves])
         else:
-            best_score = min([self.minimax(game.forcast_move(potential_move), depth-1, True) for potential_move in game.get_legal_moves()])
+            # If a min player, find the min of the score of all legal moves on the next level. Return a tuple of min score and the move that got there
+            best_score, best_move = min([(self.minimax( game.forecast_move(potential_move), depth-1, True)[0], potential_move) for potential_move in next_moves])
 
-        return best_score
+        return best_score, best_move
+
 
     # This will be the same as mini max, but with more terminating conditions, and updating alpha and beta
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
