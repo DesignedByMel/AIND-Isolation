@@ -135,16 +135,27 @@ class CustomPlayer:
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
 
-            # if iterative_deeping == True:
-                # keep track of the best move at any time, update as I move down the tree
-                    # I htink this means more of BFS
-                    # maybe go up the plies instead of down, and put in the game as it changes? idk
-            #else:
+            if self.iterative == True:
+                # Fixed search depth on appropriate method
 
-            if self.method == 'minimax':
-                _, best_move = self.minimax(game,self.search_depth)
-            elif self.method == 'alphabeta':
-                _, best_move = self.minimax(game, self.search_depth)
+                ply = 1     # Book keeping for the ply
+
+                # While there are moves left
+                while game.get_legal_moves() != 0:
+
+                    # Go one ply deeper and save the best move
+                    if self.method == 'minimax':
+                        _, best_move = self.minimax(game, ply)
+                    elif self.method == 'alphabeta':
+                        _, best_move = self.minimax(game, ply)
+
+                    ply = ply + 1
+            else:
+                # Fixed search depth on appropriate method
+                if self.method == 'minimax':
+                    _, best_move = self.minimax(game,self.search_depth)
+                elif self.method == 'alphabeta':
+                    _, best_move = self.minimax(game, self.search_depth)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -249,11 +260,54 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
+        # Raises timeout exception when time is up
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
+        # Termination Function, if we are at the depth we wanted we score the "leaf" and go back up the tree
+        if depth == 0:
+            return self.score(game, self), None
 
-        # TODO: finish this function!
-        raise NotImplementedError
-        # returns the score or does it return the location or both? (like location if it finds the answer and score if it hasn't)
-        # Return should be exactly the same as mini max
+        # Get the legal moves, if none then return (-1,-1)
+        next_moves = game.get_legal_moves()
+        if len(next_moves) == 0:
+            return self.score(game, self), (-1, -1)
+
+        # Found out that this wasn't a good idea in the list comphrension...
+        if maximizing_player == True:
+            # For a Max Player
+            # Initialize the score for the children
+            best_score = float("-inf")
+            best_move = None
+
+            for potential_move in next_moves:
+                # Find the max of the score of all legal moves on the next level, store the score for that state and the move that got to it
+                curr_score, curr_move = (self.alphabeta(game.forecast_move(potential_move), depth-1, alpha, beta, False)[0], potential_move)
+                best_score, best_move = max((best_score, best_move), (curr_score, curr_move))
+
+                # Prune any branch you can by terminating the DFS
+                if best_score >= beta:
+                    return best_score, best_move
+
+                # Update the alpha if needed
+                alpha = max(alpha, best_score)
+        else:
+            # For a Min Player
+            # Initialize the score for the children
+            best_score = float("inf")
+            best_move = None
+
+            for potential_move in next_moves:
+                # Find the min of the score of all legal moves on the next level, store the score for that state and the move that got to it
+                curr_score, curr_move = (self.alphabeta(game.forecast_move(potential_move), depth - 1, alpha, beta, True)[0], potential_move)
+                best_score, best_move = min((best_score, best_move), (curr_score, curr_move))
+
+                # Prune any branch you can
+                if best_score <= alpha:
+                    return best_score, best_move
+
+                # Update the beta if needed
+                beta = min(beta, best_score)
+
+        # Return the score and move
+        return best_score, best_move
