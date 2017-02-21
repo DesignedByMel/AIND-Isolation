@@ -169,7 +169,6 @@ def makeBranchEval(first_branch):
 
     return score
 
-#TODO example of a dfs with the board
 class CounterBoard(isolation.Board):
     """Subclass of the isolation board that maintains counters for the number
     of unique nodes and total nodes visited during depth first search.
@@ -228,7 +227,7 @@ class Project1Test(unittest.TestCase):
         return agentUT, board
 
     @timeout(5)
-    @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
+    #@unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
     def test_heuristic(self):
         """ Test output interface of heuristic score function interface."""
 

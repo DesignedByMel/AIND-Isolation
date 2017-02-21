@@ -7,6 +7,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 import random
+import math
 from random import randint
 
 class Timeout(Exception):
@@ -37,12 +38,19 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    # TODO: make three
+    if game.is_loser(player):
+        return float("-inf")
 
+    if game.is_winner(player):
+        return float("inf")
 
-    # TODO: finish this function!
-    raise NotImplementedError
+    player_position = game.get_player_location(player)
+    opponent_position = game.get_player_location(game.get_opponent(player))
 
+    distance_between = math.sqrt(math.pow(player_position[0] - opponent_position[0] , 2) + math.pow( player_position[1] - opponent_position[1], 2))
+    num_moves = float(len(game.get_legal_moves(player)))
+
+    return distance_between + num_moves
 
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
@@ -120,7 +128,6 @@ class CustomPlayer:
         """
 
         self.time_left = time_left
-        # TODO: finish this function!
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
